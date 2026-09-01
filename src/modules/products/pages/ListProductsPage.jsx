@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
 import EditProductModal from '../components/EditProductModal';
+import CreateProductModal from '../components/CreateProductModal';
 import useAuth from '../../auth/hook/useAuth';
 
 const getProducts = async (searchTerm, status, pageNumber, pageSize, token) => {
@@ -84,6 +85,7 @@ function ListProductsPage() {
   const { user } = useAuth(); // Obtener el objeto user desde AuthContext
   const token = user?.token || localStorage.getItem('token');
   const isAuthenticated = Boolean(token);
+  const isAdmin = user?.role?.toLowerCase() === 'admin';
 
   const [searchTerm, setSearchTerm] = useState('');
   const [status, setStatus] = useState(productStatus.ALL);
@@ -93,13 +95,19 @@ function ListProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const handleProductUpdated = (updatedProduct) => {
     if (updatedProduct?.id) {
       setProducts((prev) =>
-        prev.map((p) => (p.id === updatedProduct.id ? { ...p, ...updatedProduct } : p))
+        prev.map((p) => (p.id === updatedProduct.id ? { ...p, ...updatedProduct } : p)),
       );
     }
+
+    fetchProducts();
+  };
+
+  const handleProductCreated = () => {
     fetchProducts();
   };
 
@@ -192,7 +200,16 @@ function ListProductsPage() {
       <div className="p-6">
         <Card>
           <div className='flex justify-between items-center mb-3'>
-            <h1 className='text-3xl'>Productos</h1>
+            <h1 className='text-3xl font-bold text-gray-800'>Productos</h1>
+            {isAdmin && (
+              <Button
+                onClick={() => setIsCreateModalOpen(true)}
+                className='px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2 shadow-sm font-medium transition'
+              >
+                <span className='text-lg leading-none font-bold'>+</span>
+                <span>Crear Producto</span>
+              </Button>
+            )}
           </div>
 
           <div className='flex flex-col sm:flex-row gap-4'>
@@ -297,35 +314,25 @@ function ListProductsPage() {
                 <option value="15">15 por página</option>
                 <option value="20">20 por página</option>
               </select>
-              <div>
-                {user?.role === 'Admin' && (
-                  <Button
-                    onClick={() => navigate('/admin/products/create')}
-                    className="hidden sm:block px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
-                  >
-                    Crear Producto
-                  </Button>
-                )}
-
-              </div>
             </div>
 
           </div>
         )}
 
         {/* BOTON PARA CREAR PRODUCTO VERSION MOBILE */}
-        {location.pathname === '/admin/products' && (
+        {isAdmin && (
           <button
-            onClick={() => navigate('/admin/products/create')}
+            type='button'
+            onClick={() => setIsCreateModalOpen(true)}
+            aria-label='Crear Producto'
             className="
                   sm:hidden flex
                   fixed bottom-6 right-6 z-[9500]
                   w-14 h-14 rounded-full
                   bg-purple-600 text-white
-                  flex items-center justify-center
+                  items-center justify-center
                   text-3xl shadow-xl
-                  hover:bg-purple-700 active:scale-95
-                  fixed bottom-6 right-6 z-[9500] w-14 h-14 h-14 sm:hidden ... "
+                  hover:bg-purple-700 active:scale-95 transition"
           >
             +
           </button>
@@ -353,6 +360,13 @@ function ListProductsPage() {
             →
           </button>
         </div>
+
+        {/* Modal de Creación de Producto */}
+        <CreateProductModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onProductCreated={handleProductCreated}
+        />
 
         {/* Modal de Modificación de Producto */}
         <EditProductModal
