@@ -43,7 +43,9 @@ export const listOrders = async (statusOrParams = null, pageNumber = null, pageS
     if (error.response && (error.response.status === 404 || error.response.status === 204)) {
       return { data: [], error: null };
     }
+
     console.error('Error al listar órdenes:', error);
+
     return { data: null, error };
   }
 };
@@ -51,12 +53,35 @@ export const listOrders = async (statusOrParams = null, pageNumber = null, pageS
 export const getOrderById = async (id) => {
   try {
     const response = await instance.get(`/api/orders/${id}`);
+
     return { data: response.data, error: null };
   } catch (error) {
     if (error.response && (error.response.status === 404 || error.response.status === 400 || error.response.status === 204)) {
       return { data: null, error: null };
     }
+
     console.error('Error al obtener orden por ID:', error);
+
     return { data: null, error };
   }
-};
+};
+
+export const ORDER_STATUSES = [
+  { value: 'Pending', label: 'Pending (Pendiente)' },
+  { value: 'Processing', label: 'Processing (En proceso)' },
+  { value: 'Shipped', label: 'Shipped (Enviado)' },
+  { value: 'Delivered', label: 'Delivered (Entregado)' },
+  { value: 'Cancelled', label: 'Cancelled (Cancelado)' },
+];
+
+export const updateOrderStatus = async (id, status) => {
+  try {
+    const response = await instance.put(`/api/orders/${id}/status`, { status });
+
+    return { data: response.data, error: null };
+  } catch (error) {
+    console.error('Error al actualizar estado de la orden:', error);
+
+    return { data: null, error };
+  }
+};

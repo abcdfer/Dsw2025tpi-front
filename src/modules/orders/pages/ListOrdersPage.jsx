@@ -4,6 +4,7 @@ import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import useAuth from '../../auth/hook/useAuth';
 import { useNavigate } from 'react-router-dom';
+import EditOrderModal from '../components/EditOrderModal';
 
 import { listOrders, getOrderById } from '../services/listServices';
 
@@ -31,6 +32,19 @@ const ListOrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  const handleOrderUpdated = (updatedOrder) => {
+    if (updatedOrder?.id) {
+      setOrders((prev) =>
+        prev.map((o) => (o.id === updatedOrder.id ? { ...o, ...updatedOrder } : o))
+      );
+      if (selectedOrder?.id === updatedOrder.id) {
+        setSelectedOrder((prev) => (prev ? { ...prev, ...updatedOrder } : null));
+      }
+    }
+    fetchOrders();
+  };
 
   // Fetch principal
   const fetchOrders = useCallback(async (customSearch = searchTerm) => {
@@ -239,7 +253,10 @@ const ListOrdersPage = () => {
                   {order.status}
                 </span>
 
-                <Button className="bg-blue-500 hover:bg-blue-600 text-white p-2 text-sm">
+                <Button
+                  onClick={() => setSelectedOrder(order)}
+                  className="bg-blue-500 hover:bg-blue-600 text-white p-2 text-sm rounded-lg"
+                >
                   Ver / Modificar
                 </Button>
               </div>
@@ -309,6 +326,14 @@ const ListOrdersPage = () => {
           →
         </button>
       </div>
+
+      {/* Modal de Modificación y Visualización de Orden */}
+      <EditOrderModal
+        isOpen={Boolean(selectedOrder)}
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+        onOrderUpdated={handleOrderUpdated}
+      />
     </div>
   );
 };

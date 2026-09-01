@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
-
-
-
+import EditProductModal from '../components/EditProductModal';
 import useAuth from '../../auth/hook/useAuth';
 
 const getProducts = async (searchTerm, status, pageNumber, pageSize, token) => {
@@ -94,6 +92,16 @@ function ListProductsPage() {
   const [total, setTotal] = useState(0);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingProduct, setEditingProduct] = useState(null);
+
+  const handleProductUpdated = (updatedProduct) => {
+    if (updatedProduct?.id) {
+      setProducts((prev) =>
+        prev.map((p) => (p.id === updatedProduct.id ? { ...p, ...updatedProduct } : p))
+      );
+    }
+    fetchProducts();
+  };
 
   // --- Lógica de FETCH y Carga ---
 
@@ -240,12 +248,12 @@ function ListProductsPage() {
                 </div>
 
                 <div className='flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-2 sm:mt-0'>
-                  {/* Botón 'Ver' para ver detalles del producto */}
+                  {/* Botón para abrir modal de modificación de producto */}
                   <Button
-                    onClick={() => navigate(`/admin/products/view/${product.id}`)}
-                    className='bg-indigo-600 hover:bg-indigo-700 text-white p-2 text-sm'
+                    onClick={() => setEditingProduct(product)}
+                    className='bg-indigo-600 hover:bg-indigo-700 text-white p-2 text-sm rounded-lg'
                   >
-                    Ver
+                    Modificar
                   </Button>
                   {/* Botón para habilitar/deshabilitar producto vía PATCH */}
                   <Button
@@ -346,6 +354,13 @@ function ListProductsPage() {
           </button>
         </div>
 
+        {/* Modal de Modificación de Producto */}
+        <EditProductModal
+          isOpen={Boolean(editingProduct)}
+          product={editingProduct}
+          onClose={() => setEditingProduct(null)}
+          onProductUpdated={handleProductUpdated}
+        />
       </div>
     );
   }
