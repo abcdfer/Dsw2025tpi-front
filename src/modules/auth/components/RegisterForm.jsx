@@ -7,22 +7,44 @@ import Input from '../../shared/components/Input';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
 
-export default function RegisterForm() {
+export default function RegisterForm() { {/*Define la estructura (JSX) y la lógica general (estado, hooks) que se renderizará en la página de registro. */}
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const navigate = useNavigate();
   const [backendError, setBackendError] = useState(null);
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data) => { /* Se ejecuta cuando el usuario envia el formulario */
+    setBackendError(null);
     try {
+      /* Se llama al ENDPOINT registro con RegisterModel ({ email, password, username }) */
       await instance.post('/api/authenticate/register', {
-        username: data.username,
         email: data.email,
-        password: data.password
+        password: data.password,
+        username: data.username,
       });
-
+      /* Si el registro tiene exito se redirige al login */
       navigate('/login');
     } catch (error) {
-      setBackendError('No se pudo registrar. Verifique los datos.');
+      /* Si el registro falla se muestra el mensaje o lista de errores devueltos por el backend */
+      console.error('[Register] error:', error);
+      const resData = error.response?.data;
+
+      if (resData) {
+        if (Array.isArray(resData.errors) && resData.errors.length > 0) {
+          const messages = resData.errors.map(err => typeof err === 'string' ? err : err.description || err.message || JSON.stringify(err));
+          setBackendError(messages);
+        } else if (resData.errors && typeof resData.errors === 'object') {
+          const messages = Object.values(resData.errors).flat().map(err => typeof err === 'string' ? err : err.description || err.message || JSON.stringify(err));
+          setBackendError(messages.length > 0 ? messages : (resData.message || 'No se pudo registrar. Verifique los datos.'));
+        } else if (resData.message) {
+          setBackendError(resData.message);
+        } else if (typeof resData === 'string') {
+          setBackendError(resData);
+        } else {
+          setBackendError('No se pudo registrar. Verifique los datos.');
+        }
+      } else {
+        setBackendError('No se pudo registrar. Error de conexión con el servidor.');
+      }
     }
   };
 
@@ -31,26 +53,39 @@ export default function RegisterForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 
-        {backendError && <p className="text-red-500">{backendError}</p>}
+        {backendError && (
+          <div className="text-red-500 text-sm">
+            {Array.isArray(backendError) ? (
+              <ul className="list-disc pl-5 space-y-1">
+                {backendError.map((err, idx) => (
+                  <li key={idx}>{err}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>{backendError}</p>
+            )}
+          </div>
+        )}
 
         <Input
           label="Usuario"
           error={errors.username?.message}
           {...register('username', {
             required: 'El usuario es obligatorio',
-            minLength: { value: 3, message: 'Mínimo 3 caracteres' }
+            minLength: { value: 3, message: 'Mínimo 3 caracteres' },
           })}
         />
 
         <Input
           label="Email"
+          type="email"
           error={errors.email?.message}
           {...register('email', {
             required: 'El email es obligatorio',
             pattern: {
               value: /\S+@\S+\.\S+/,
-              message: 'Formato de email inválido'
-            }
+              message: 'Formato de email inválido',
+            },
           })}
         />
 
@@ -60,7 +95,7 @@ export default function RegisterForm() {
           error={errors.password?.message}
           {...register('password', {
             required: 'La contraseña es obligatoria',
-            minLength: { value: 6, message: 'Mínimo 6 caracteres' }
+            minLength: { value: 6, message: 'Mínimo 6 caracteres' },
           })}
         />
 
@@ -71,7 +106,7 @@ export default function RegisterForm() {
           {...register('confirmPassword', {
             required: 'Debe confirmar la contraseña',
             validate: (value) =>
-              value === watch('password') || 'Las contraseñas no coinciden'
+              value === watch('password') || 'Las contraseñas no coinciden',
           })}
         />
 

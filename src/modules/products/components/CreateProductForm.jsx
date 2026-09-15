@@ -5,7 +5,7 @@ import Card from '../../shared/components/Card';
 import Input from '../../shared/components/Input';
 import { createProduct } from '../services/create';
 import { useState } from 'react';
-import { frontendErrorMessage } from '../helpers/backendError';
+import { frontendErrorMessage } from '../../shared/helpers/backendError';
 
 function CreateProductForm() {
   const {
@@ -20,6 +20,7 @@ function CreateProductForm() {
       description: '',
       price: 0,
       stock: 0,
+      isActive: true,
     },
   });
 
@@ -28,16 +29,20 @@ function CreateProductForm() {
 
   const onValid = async (formData) => {
     try {
+      setErrorBackendMessage('');
       await createProduct(formData);
 
       navigate('/admin/products');
     } catch (error) {
-      if (error.response?.data?.detail) {
-        const errorMessage = frontendErrorMessage[error.response.data.code];
+      console.error('ERROR COMPLETO:', error);
 
-        setErrorBackendMessage(errorMessage);
+      const data = error.response?.data;
+      const errorMsg = data?.error || data?.message || data?.Message || frontendErrorMessage[data?.code];
+
+      if (errorMsg) {
+        setErrorBackendMessage(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
       } else {
-        setErrorBackendMessage('Contactar a Soporte');
+        setErrorBackendMessage('Error desconocido al crear el producto');
       }
     }
   };
@@ -84,11 +89,10 @@ function CreateProductForm() {
           label='Precio'
           error={errors.price?.message}
           type='number'
+          step='any'
           {...register('price', {
-            min: {
-              value: 0,
-              message: 'No puede tener un precio negativo',
-            },
+            required: 'El precio es requerido',
+            validate: (value) => Number(value) > 0 || 'El precio debe ser mayor a 0',
           })}
         />
         <Input

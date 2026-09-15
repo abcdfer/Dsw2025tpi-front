@@ -1,87 +1,103 @@
+import { useForm } from 'react-hook-form'; /* Va a permitir gestionar el manejo del formulario, es decir la validacion de cada campo y la funcion handleSubmit */
+import { instance } from '../../shared/api/axiosInstance';
+import { useNavigate, Link } from 'react-router-dom'; /* Permiten la navegacion correcta despues del login entre diversas paginas */
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import useAuth from '../hook/useAuth'; /* Facilita la utilizacion del a funcion SINGIN para actualizar el estado de la funcion desp de ingresar */
+
 import Input from '../../shared/components/Input';
 import Button from '../../shared/components/Button';
-import useAuth from '../hook/useAuth';
-import { frontendErrorMessage } from '../helpers/backendError';
+import Card from '../../shared/components/Card';
 
-function LoginForm() {
-  const [errorMessage, setErrorMessage] = useState('');
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({ defaultValues: { username: '', password: '' } });
-
+export default function LoginForm({ onSuccess })  { /*Se ejecuta cuando el usuario envia el formulario */
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
-
-  const { user, singin } = useAuth();
-
-  const onValid = async (formData) => {
+  const [backendError, setBackendError] = useState(null);
+  const { singin } = useAuth();
+  
+  const onSubmit = async (data) => {
     try {
-      const response = await singin(formData.username, formData.password);
+      //  1. Llamamos al endpoint login
+      const response = await instance.post('/api/authenticate/login', {
+        email: data.email,
+        password: data.password,
+      });
 
-      if (response.error) {
-        setErrorMessage(response.error.frontendErrorMessage);
+      const { token, user } = response.data;
 
-        return;
-      }
-      
-      const userRole = response.user?.role;
-      if(userRole == 'Admin'){
-         navigate('/admin/home');
-      }else{
+      console.log('[Login] respuesta backend:', response.data);
+      console.log('ROL:', user?.role);
+
+      //  2. Guardamos todo lo necesario en localStorage
+      localStorage.setItem('token', token);
+      localStorage.setItem('customerId', user?.id);
+      localStorage.setItem('username', user?.email);
+      localStorage.setItem('role', user?.role);
+
+      singin({
+        token,
+        username: user?.email,
+        customerId: user?.id,
+        role: user?.role,
+      });
+
+      /* Si el inicio de sesion tiene exito se actualiza el estado de la app */
+      if (onSuccess) onSuccess();
+
+      //  3. Redirigimos según el rol (insensible a mayúsculas/minúsculas)
+      if (user?.role?.toLowerCase() === 'admin') {
+        navigate('/admin/home');
+      } else {
         navigate('/');
       }
-    
-   
+
     } catch (error) {
-      if (error?.response?.data?.code) {
-        setErrorMessage(frontendErrorMessage[error?.response?.data?.code]);
-      } else {
-        setErrorMessage('Llame a soporte');
-      }
+      console.error('[Login] error:', error);
+      setBackendError('Email o contraseña incorrectos.');
     }
   };
 
   return (
-    <form className='
-        flex
-        flex-col
-        gap-20
-        bg-white
-        p-8
-        sm:w-md
-        sm:gap-4
-        sm:rounded-lg
-        sm:shadow-lg
-      '
-    onSubmit={handleSubmit(onValid)}
-    >
-      <Input
-        label='Usuario'
-        { ...register('username', {
-          required: 'Usuario es obligatorio',
-        }) }
-        error={errors.username?.message}
-      />
-      <Input
-        label='Contraseña'
-        { ...register('password', {
-          required: 'Contraseña es obligatorio',
-        }) }
-        type='password'
-        error={errors.password?.message}
-      />
+    <Card className="p-6 flex flex-col gap-4 w-full max-w-md">
 
-      <Button type='submit'>Iniciar Sesión</Button>
-      <Button variant='secondary'type='button'onClick={() => navigate('/signup')}>
-       Registrar Usuario
-      </Button>
-      {errorMessage && <p className='text-red-500'>{errorMessage}</p>}
-    </form>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+
+        {backendError && <p className="text-red-600">{backendError}</p>}
+
+        <Input
+          label="Email"
+          type="email"
+          error={errors.email?.message}
+          {...register('email', {
+            required: 'El email es obligatorio',
+            pattern: {
+              value: /\S+@\S+\.\S+/,
+              message: 'Formato de email inválido',
+            },
+          })}
+        />
+
+        <Input
+          type="password"
+          label="Contraseña"
+          error={errors.password?.message}
+          {...register('password', {
+            required: 'La contraseña es obligatoria',
+          })}
+        />
+
+        <Button type="submit" variant="default">
+          Iniciar Sesión
+        </Button>
+
+      </form>
+
+      <p className="text-sm text-center">
+        ¿No tenés cuenta?
+        <Link to="/signup" className="text-purple-500 ml-1 hover:underline">
+          Registrarme
+        </Link>
+      </p>
+
+    </Card>
   );
-};
-
-export default LoginForm;
+}
