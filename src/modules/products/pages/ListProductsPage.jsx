@@ -3,18 +3,19 @@ import { useNavigate, Link } from 'react-router-dom';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
 
-
-
 import useAuth from '../../auth/hook/useAuth';
 
 const getProducts = async (searchTerm, status, pageNumber, pageSize, token) => {
   const params = new URLSearchParams();
+
   if (searchTerm && searchTerm.trim() !== '') {
     params.append('search', searchTerm.trim());
   }
+
   if (status && status !== 'all' && status.trim() !== '') {
     params.append('status', status.trim());
   }
+
   params.append('pageNumber', String(pageNumber));
   params.append('pageSize', String(pageSize));
 
@@ -39,7 +40,6 @@ const getProducts = async (searchTerm, status, pageNumber, pageSize, token) => {
       totalCount: 0,
     };
   }
-
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
@@ -83,9 +83,8 @@ const productStatus = {
 
 function ListProductsPage() {
   const navigate = useNavigate();
-  const { user } = useAuth(); // Obtener el objeto user desde AuthContext
-  const token = user?.token || localStorage.getItem('token');
-  const isAuthenticated = Boolean(token);
+  const { user, isAuthenticated } = useAuth();
+  const token = user?.token;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [status, setStatus] = useState(productStatus.ALL);
@@ -102,6 +101,7 @@ function ListProductsPage() {
 
     if (!activeToken) {
       setLoading(false);
+
       return;
     }
 
@@ -130,6 +130,7 @@ function ListProductsPage() {
 
   const _handleDisableProduct = async (id, isActive = true) => {
     const action = isActive ? 'deshabilitar' : 'habilitar';
+
     if (!window.confirm(`¿Estás seguro de que quieres ${action} este producto?`)) return;
 
     const activeToken = token;
@@ -137,6 +138,7 @@ function ListProductsPage() {
     if (!activeToken) {
       alert('Sesión expirada. Redirigiendo a login...');
       navigate('/login');
+
       return;
     }
 

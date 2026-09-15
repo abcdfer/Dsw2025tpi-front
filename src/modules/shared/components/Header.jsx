@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { FiShoppingCart, FiSearch } from "react-icons/fi";
-import useAuth from "../../auth/hook/useAuth";
-import useCart from "../../cart/hooks/useCart";
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { FiShoppingCart, FiSearch } from 'react-icons/fi';
+import useAuth from '../../auth/hook/useAuth';
+import useCart from '../../cart/hooks/useCart';
 
 export default function Header() {
   const { isAuthenticated, singout } = useAuth();
@@ -12,29 +12,31 @@ export default function Header() {
   const [sp] = useSearchParams();
 
   // usamos "/" como catálogo
-  const CATALOG_PATH = "/";
+  const CATALOG_PATH = '/';
 
   // precarga el valor si ya estamos en "/"
-  const [text, setText] = useState(location.pathname === CATALOG_PATH ? (sp.get("search") || "") : "");
+  const [text, setText] = useState(location.pathname === CATALOG_PATH ? (sp.get('search') || '') : '');
   const [isSearchVisible, setIsSearchVisible] = useState(false);
 
   const cartItemCount = cart.reduce((t, i) => t + (i.quantity || 0), 0);
 
   const handleLogout = () => {
-    try { singout(); } catch {}
-    try { localStorage.removeItem("customerId"); } catch {}
-    try { window.dispatchEvent(new Event("cartUpdated")); } catch {}
-    navigate("/login");
+    try { singout(); } catch (e) { console.error(e); }
+    try { localStorage.removeItem('customerId'); } catch (e) { console.error(e); }
+    try { window.dispatchEvent(new Event('cartUpdated')); } catch (e) { console.error(e); }
+    navigate('/login');
   };
 
   const goSearch = () => {
     const qs = new URLSearchParams();
-    if (text.trim()) qs.set("search", text.trim());
-    qs.set("page", "1");
+
+    if (text.trim()) qs.set('search', text.trim());
+
+    qs.set('page', '1');
     navigate({ pathname: CATALOG_PATH, search: qs.toString() }); // <-- navega a "/?search=..&page=1"
   };
 
-  const onKeyDown = (e) => { if (e.key === "Enter") goSearch(); };
+  const onKeyDown = (e) => { if (e.key === 'Enter') goSearch(); };
 
   return (
     <header className="w-full bg-purple-600 shadow-md sticky top-0 z-50">

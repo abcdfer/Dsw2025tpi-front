@@ -1,19 +1,18 @@
-
-import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import Button from "../../shared/components/Button";
-import ProductCard from "../components/ProductCard";
-import ClientMenu from "../../client/components/ClientMenu";
-import useAuth from "../../auth/hook/useAuth";
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import Button from '../../shared/components/Button';
+import ProductCard from '../components/ProductCard';
+import ClientMenu from '../../client/components/ClientMenu';
+import useAuth from '../../auth/hook/useAuth';
 
 const DEFAULT_PAGE_SIZE = 12;
 
 const ClientProductsPage = () => {
   // --- URL params (los setea el Header con /?search=...&page=1) ---
   const [sp, setSp] = useSearchParams();
-  const search = sp.get("search") || "";
-  const page = Math.max(1, Number(sp.get("page") || 1));
-  const size = Math.max(1, Number(sp.get("size") || DEFAULT_PAGE_SIZE));
+  const search = sp.get('search') || '';
+  const page = Math.max(1, Number(sp.get('page') || 1));
+  const size = Math.max(1, Number(sp.get('size') || DEFAULT_PAGE_SIZE));
 
   // --- Estados ---
   const [products, setProducts] = useState([]); // página actual
@@ -29,9 +28,11 @@ const ClientProductsPage = () => {
 
   // --- Agregar al carrito ---
   const handleAddToCart = (product, quantity) => {
-    if (quantity < 1) return alert("Debes seleccionar al menos 1 unidad.");
-    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    if (quantity < 1) return alert('Debes seleccionar al menos 1 unidad.');
+
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const i = cart.findIndex((it) => it.id === product.id);
+
     if (i !== -1) cart[i].quantity += quantity;
     else
       cart.push({
@@ -41,8 +42,9 @@ const ClientProductsPage = () => {
         price: product.currentUnitPrice,
         quantity,
       });
-    localStorage.setItem("cart", JSON.stringify(cart));
-    window.dispatchEvent(new Event("cartUpdated"));
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    window.dispatchEvent(new Event('cartUpdated'));
   };
 
   //  Fetch + paginación del backend
@@ -52,11 +54,13 @@ const ClientProductsPage = () => {
       setError(null);
 
       const qs = new URLSearchParams();
+
       if (search) {
-        qs.set("search", search);
+        qs.set('search', search);
       }
-      qs.set("pageNumber", String(page));
-      qs.set("pageSize", String(size));
+
+      qs.set('pageNumber', String(page));
+      qs.set('pageSize', String(size));
 
       try {
         const res = await fetch(`/api/products?${qs.toString()}`);
@@ -65,10 +69,12 @@ const ClientProductsPage = () => {
         if (res.status === 204) {
           setProducts([]);
           setTotalItems(0);
+
           return;
         }
 
         if (!res.ok) throw new Error(`Error en la red: ${res.status}`);
+
         const data = await res.json();
 
         // Leer data.productsItems (o fallbacks) y data.total
@@ -85,31 +91,36 @@ const ClientProductsPage = () => {
     };
 
     fetchProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [search, page, size]);
 
   // --- Paginación (actualiza URL) ---
   const goToPrevPage = () => {
     if (page === 1) return;
+
     const q = new URLSearchParams(sp);
-    q.set("page", String(page - 1));
+
+    q.set('page', String(page - 1));
     setSp(q);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const goToNextPage = () => {
     if (page === totalPages) return;
+
     const q = new URLSearchParams(sp);
-    q.set("page", String(page + 1));
+
+    q.set('page', String(page + 1));
     setSp(q);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const changeSize = (e) => {
     const newSize = Number(e.target.value) || DEFAULT_PAGE_SIZE;
     const q = new URLSearchParams(sp);
-    q.set("size", String(newSize));
-    q.set("page", "1");
+
+    q.set('size', String(newSize));
+    q.set('page', '1');
     setSp(q);
   };
 
@@ -117,6 +128,7 @@ const ClientProductsPage = () => {
   if (isLoading && products.length === 0) {
     return <div className="text-center mt-10">Cargando catálogo...</div>;
   }
+
   if (error) {
     return (
       <div className="text-center mt-10 bg-red-100 p-4 rounded text-red-700">
@@ -133,8 +145,6 @@ const ClientProductsPage = () => {
         <h1 className="text-4xl font-extrabold text-gray-800">Catálogo de Productos</h1>
       </div>
 
-
-
       {/* GRID DE PRODUCTOS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.map((product) => (
@@ -147,7 +157,6 @@ const ClientProductsPage = () => {
         ))}
       </div>
 
-
       {/* --- INFO + PAGINACIÓN + TAMAÑO  --- */}
       <div className="mt-8 p-4 bg-white rounded-xl shadow-md
               flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -155,7 +164,7 @@ const ClientProductsPage = () => {
         {/* izquierda: info */}
         <span className="text-gray-600 text-sm">
           Mostrando {products.length} de {totalItems}
-          {search ? <> resultados para “<b>{search}</b>”.</> : " resultados."}
+          {search ? <> resultados para “<b>{search}</b>”.</> : ' resultados.'}
         </span>
 
         {/* centro: selector de tamaño */}
@@ -198,17 +207,16 @@ const ClientProductsPage = () => {
         </div>
       </div>
 
-
       {/* MENÚ MÓVIL */}
       <ClientMenu
         isOpen={menuOpen}
         onClose={() => setMenuOpen(false)}
         onLogout={() => {
-          try { singout(); } catch { }
-          try { localStorage.removeItem("customerId"); } catch { }
-          try { window.dispatchEvent(new Event("cartUpdated")); } catch { }
+          try { singout(); } catch (e) { console.error(e); }
+          try { localStorage.removeItem('customerId'); } catch (e) { console.error(e); }
+          try { window.dispatchEvent(new Event('cartUpdated')); } catch (e) { console.error(e); }
           setMenuOpen(false);
-          navigate("/login");
+          navigate('/login');
         }}
       />
     </div>

@@ -15,37 +15,37 @@ import RootLayout from './modules/shared/components/RootLayout.jsx';
 
 function App() {
   const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <RootLayout />,   // ✔ Aca metemos el Header
-    children: [
-      { path: '/', element: <ClientProductPage /> },
-      { path: '/cart', element: <CartPage /> },
-    ],
-  },
-  {
-    path: '/signup',
-    element: <RegisterPage />,
-  },
-  {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/admin',
-    element: (
-      <ProtectedRoute>
-        <Dashboard />
-      </ProtectedRoute>
-    ),
-    children: [
-      { path: '/admin/home', element: <Home /> },
-      { path: '/admin/products', element: <ListProductsPage /> },
-      { path: '/admin/products/create', element: <CreateProductPage /> },
-      { path: '/admin/orders', element: <ListOrdersPage /> },
-    ],
-  },
-]);
+    {
+      path: '/',
+      element: <RootLayout />,   // ✔ Aca metemos el Header
+      children: [
+        { path: '/', element: <ClientProductPage /> },
+        { path: '/cart', element: <CartPage /> },
+      ],
+    },
+    {
+      path: '/signup',
+      element: <RegisterPage />,
+    },
+    {
+      path: '/login',
+      element: <LoginPage />,
+    },
+    {
+      path: '/admin',
+      element: (
+        <ProtectedRoute allowedRoles={['Admin']}>
+          <Dashboard />
+        </ProtectedRoute>
+      ),
+      children: [
+        { path: '/admin/home', element: <Home /> },
+        { path: '/admin/products', element: <ListProductsPage /> },
+        { path: '/admin/products/create', element: <CreateProductPage /> },
+        { path: '/admin/orders', element: <ListOrdersPage /> },
+      ],
+    },
+  ]);
 
   return (
     <AuthProvider>

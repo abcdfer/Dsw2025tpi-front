@@ -7,7 +7,7 @@ import Input from '../../shared/components/Input';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
 
-export default function RegisterForm() { {/*Define la estructura (JSX) y la lógica general (estado, hooks) que se renderizará en la página de registro. */}
+export default function RegisterForm() { { /*Define la estructura (JSX) y la lógica general (estado, hooks) que se renderizará en la página de registro. */ }
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const navigate = useNavigate();
   const [backendError, setBackendError] = useState(null);
@@ -31,9 +31,11 @@ export default function RegisterForm() { {/*Define la estructura (JSX) y la lóg
       if (resData) {
         if (Array.isArray(resData.errors) && resData.errors.length > 0) {
           const messages = resData.errors.map(err => typeof err === 'string' ? err : err.description || err.message || JSON.stringify(err));
+
           setBackendError(messages);
         } else if (resData.errors && typeof resData.errors === 'object') {
           const messages = Object.values(resData.errors).flat().map(err => typeof err === 'string' ? err : err.description || err.message || JSON.stringify(err));
+
           setBackendError(messages.length > 0 ? messages : (resData.message || 'No se pudo registrar. Verifique los datos.'));
         } else if (resData.message) {
           setBackendError(resData.message);

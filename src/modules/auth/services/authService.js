@@ -9,8 +9,8 @@ export const login = async (email, password) => { /* Funcion encargada de accede
 
     // Loguear la respuesta completa para ayudar a diagnosticar customerId/token
     try {
-       console.debug('[Auth] login response:', response.data);  /* Si tiene exito obtiene el response.data que es el token */
-      }catch (e) {
+      console.debug('[Auth] login response:', response.data);  /* Si tiene exito obtiene el response.data que es el token */
+    } catch (e) {
       console.error('Error logging response data:', e);  /* Si NO tiene exito obtiene el error */
     }
 

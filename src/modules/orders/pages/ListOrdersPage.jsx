@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import useAuth from '../../auth/hook/useAuth';
-import { useNavigate } from 'react-router-dom';
 
 import { listOrders, getOrderById } from '../services/listServices';
 
@@ -18,7 +17,6 @@ const orderStatus = {
 };
 
 const ListOrdersPage = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const token = user?.token || localStorage.getItem('token');
   const isAuthenticated = Boolean(token);
@@ -35,8 +33,10 @@ const ListOrdersPage = () => {
   // Fetch principal
   const fetchOrders = useCallback(async (customSearch = searchTerm) => {
     const activeToken = token;
+
     if (!activeToken) {
       setLoading(false);
+
       return;
     }
 
@@ -70,10 +70,12 @@ const ListOrdersPage = () => {
             setOrders([]);
             setTotal(0);
           }
+
           return;
         } else {
           // Si no es un GUID completo, intentamos buscar por ID o filtramos en memoria
           const { data, error } = await getOrderById(trimmedSearch);
+
           if (!error && data) {
             if (statusFilter !== orderStatus.ALL && data.status?.toLowerCase() !== statusFilter.toLowerCase()) {
               setOrders([]);
@@ -82,6 +84,7 @@ const ListOrdersPage = () => {
               setOrders([data]);
               setTotal(1);
             }
+
             return;
           }
 
@@ -98,11 +101,12 @@ const ListOrdersPage = () => {
           const filtered = items.filter(o =>
             (o.id && o.id.toLowerCase().includes(trimmedSearch.toLowerCase())) ||
             (o.customerId && o.customerId.toLowerCase().includes(trimmedSearch.toLowerCase())) ||
-            (o.shippingAddress && o.shippingAddress.toLowerCase().includes(trimmedSearch.toLowerCase()))
+            (o.shippingAddress && o.shippingAddress.toLowerCase().includes(trimmedSearch.toLowerCase())),
           );
 
           setOrders(filtered);
           setTotal(filtered.length);
+
           return;
         }
       }
@@ -129,6 +133,7 @@ const ListOrdersPage = () => {
     } catch (error) {
       console.error('Error al obtener órdenes:', error);
       const status = error.response?.status;
+
       if (status === 401 || status === 403) {
         setFetchError('No tienes permisos de Administrador para ver las órdenes o tu sesión ha expirado.');
       } else {
@@ -153,7 +158,9 @@ const ListOrdersPage = () => {
 
   const handleSearchChange = (e) => {
     const val = e.target.value;
+
     setSearchTerm(val);
+
     if (val.trim() === '') {
       setPageNumber(1);
       fetchOrders('');
