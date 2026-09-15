@@ -57,6 +57,7 @@ function AuthProvider({ children }) {
   // Estado para el objeto de usuario (token, role, customerId, username)
   const [user, setUser] = useState(() => {
     const token = localStorage.getItem('token');
+
     /* Si existe un token */
     if (token) {
       console.debug('[Auth] init: token found');
@@ -66,6 +67,7 @@ function AuthProvider({ children }) {
 
       // Recuperar customerId desde localStorage o del token decodificado
       const storedCustomerId = localStorage.getItem('customerId');
+
       if (storedCustomerId) {
         decoded.customerId = storedCustomerId;
       } else if (decoded.customerId) {
@@ -76,6 +78,7 @@ function AuthProvider({ children }) {
 
       // Recuperar username desde localStorage o del token decodificado
       const storedUsername = localStorage.getItem('username');
+
       if (storedUsername) {
         decoded.username = storedUsername;
       } else if (decoded.username) {
@@ -86,6 +89,7 @@ function AuthProvider({ children }) {
 
       // Recuperar role desde localStorage o del token decodificado
       const storedRole = localStorage.getItem('role');
+
       if (storedRole) {
         decoded.role = storedRole;
       } else if (decoded.role) {
@@ -138,8 +142,11 @@ function AuthProvider({ children }) {
     };
 
     localStorage.setItem('token', token);
+
     if (username) localStorage.setItem('username', username);
+
     if (customerId) localStorage.setItem('customerId', customerId);
+
     if (role) localStorage.setItem('role', role);
 
     setUser(newUser);

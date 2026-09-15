@@ -7,8 +7,8 @@ function LoginPage() { /* Cumple la funcion de ser el Layout o conteniedor del F
       flex-col
       justify-center
       h-[100dvh]
-      bg-neutral-100 
-      sm:items-center 
+      bg-neutral-100
+      sm:items-center
     '>
       <LoginForm /> {/* Componente que contiene el FORM del login, permite renderizarlo */}
     </div>

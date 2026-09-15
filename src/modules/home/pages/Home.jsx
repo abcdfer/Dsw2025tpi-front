@@ -26,6 +26,7 @@ function Home() {
 
         if (productsRes.status === 'fulfilled' && productsRes.value?.data) {
           const data = productsRes.value.data;
+
           totalProducts =
             data?.total ??
             data?.totalCount ??
@@ -36,6 +37,7 @@ function Home() {
 
         if (ordersRes.status === 'fulfilled' && ordersRes.value?.data) {
           const data = ordersRes.value.data;
+
           totalOrders =
             data?.total ??
             data?.totalItems ??

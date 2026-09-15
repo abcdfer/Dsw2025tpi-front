@@ -44,6 +44,7 @@ const CartPage = () => {
   const sendOrder = async () => {
     if (!cart.length) {
       alert('Tu carrito está vacío.');
+
       return;
     }
 
@@ -53,12 +54,14 @@ const CartPage = () => {
     if (!customerId) {
       alert('Debes iniciar sesión para realizar la compra.');
       setIsModalOpen(true);
+
       return;
     }
 
     // Validaciones básicas de direcciones
     if (!shippingAddress || !billingAddress) {
       alert('Por favor completa dirección de envío y de facturación.');
+
       return;
     }
 
@@ -88,14 +91,16 @@ const CartPage = () => {
     } catch (error) {
       console.error('Error al crear la orden:', error);
       const resData = error.response?.data;
-      
+
       // Si el backend devuelve errores de validación (ValidationProblemDetails)
       let validationMessage = '';
+
       if (resData?.errors && typeof resData.errors === 'object') {
         validationMessage = Object.values(resData.errors).flat().join(' | ');
       }
 
       const message = validationMessage || resData?.message || resData?.Message || resData?.error || error.message || 'Error al procesar la compra';
+
       alert(`Error al procesar la compra: ${message}`);
     }
   };
