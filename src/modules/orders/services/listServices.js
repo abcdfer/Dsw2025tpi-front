@@ -64,4 +64,24 @@ export const getOrderById = async (id) => {
 
     return { data: null, error };
   }
-};
+};
+
+export const ORDER_STATUSES = [
+  { value: 'Pending', label: 'Pending (Pendiente)' },
+  { value: 'Processing', label: 'Processing (En proceso)' },
+  { value: 'Shipped', label: 'Shipped (Enviado)' },
+  { value: 'Delivered', label: 'Delivered (Entregado)' },
+  { value: 'Cancelled', label: 'Cancelled (Cancelado)' },
+];
+
+export const updateOrderStatus = async (id, status) => {
+  try {
+    const response = await instance.put(`/api/orders/${id}/status`, { status });
+
+    return { data: response.data, error: null };
+  } catch (error) {
+    console.error('Error al actualizar estado de la orden:', error);
+
+    return { data: null, error };
+  }
+};
