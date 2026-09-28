@@ -1,15 +1,18 @@
-const Modal = ({ isOpen, onClose, children }) => {
-  if (!isOpen) return null;
+const Modal = ({ isOpen = true, onClose, children, maxWidth = 'max-w-md', className = '' }) => {
+  if (!isOpen) {
+    return null;
+  }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md relative animate-fadeIn">
-
+    <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn'>
+      <div className={`bg-white p-6 rounded-xl shadow-2xl w-full ${maxWidth} relative max-h-[90vh] overflow-y-auto ${className}`.trim()}>
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-900 text-xl"
+          type='button'
+          className='absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold transition focus:outline-none'
+          aria-label='Cerrar modal'
         >
-                    &times;
+          &times;
         </button>
 
         {children}
